@@ -8,32 +8,36 @@ export const roomRouter = express.Router();
 
 roomRouter.get(
   '/:roomId',
-  isAuth,
-  isUserInRoom,
+  catchError(isAuth),
+  catchError(isUserInRoom),
   catchError(roomController.getRoomInfoByRoomId),
 );
 
-roomRouter.post('/', isAuth, catchError(roomController.createRoom));
+roomRouter.post('/', catchError(isAuth), catchError(roomController.createRoom));
 
 roomRouter.delete(
   '/:roomId',
-  isAuth,
-  isUserInRoom,
+  catchError(isAuth),
+  catchError(isUserInRoom),
   catchError(roomController.deleteRoom),
 );
 
 roomRouter.patch(
   '/:roomId',
-  isAuth,
-  isUserInRoom,
+  catchError(isAuth),
+  catchError(isUserInRoom),
   catchError(roomController.renameRoom),
 );
 
 roomRouter.post(
   '/:roomId/merge',
-  isAuth,
-  isUserInRoom,
+  catchError(isAuth),
+  catchError(isUserInRoom),
   catchError(roomController.mergeRooms),
 );
 
-roomRouter.post('/:roomId/join', isAuth, roomController.joinRoom);
+roomRouter.post(
+  '/:roomId/join',
+  catchError(isAuth),
+  catchError(roomController.joinRoom),
+);

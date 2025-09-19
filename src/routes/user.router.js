@@ -6,7 +6,26 @@ import { isNotAuth } from '../midlewares/isNotAuth.js';
 
 export const userRouter = express.Router();
 
-userRouter.post('/', isNotAuth, catchError(userController.createUser));
-userRouter.get('/:userId', isAuth, catchError(userController.getUserInfo));
-userRouter.patch('/:userId', isAuth, catchError(userController.changeUserName));
-userRouter.delete('/:userId', isAuth, catchError(userController.deleteUser));
+userRouter.post(
+  '/',
+  catchError(isNotAuth),
+  catchError(userController.createUser),
+);
+
+userRouter.get(
+  '/:userId',
+  catchError(isAuth),
+  catchError(userController.getUserInfo),
+);
+
+userRouter.patch(
+  '/:userId',
+  catchError(isAuth),
+  catchError(userController.changeUserName),
+);
+
+userRouter.delete(
+  '/:userId',
+  catchError(isAuth),
+  catchError(userController.deleteUser),
+);

@@ -5,30 +5,28 @@ import { userService } from '../services/user.service.js';
 
 const getRoomInfoByRoomId = async (req, res) => {
   const { roomId } = req.params;
-  const room = await roomService.findRoomById(roomId);
-  const messages = await messageService.findRoomsMessages(roomId);
 
-  if (!roomId || !room) {
+  const id = parseInt(roomId, 10);
+
+  if (isNaN(id)) {
+    return res.status(400).json({ message: 'Invalid roomId' });
+  }
+
+  const room = await roomService.findRoomById(id);
+
+  if (!room) {
     return res.status(404).json({ message: 'Room not Found' });
   }
 
-  if (!messages) {
-    return res.status(400).json({ message: 'Cannot get messages' });
-  }
+  const messages = await messageService.findRoomsMessages(id);
 
-  const roomInfo = {
+  return res.status(200).json({
     room: {
       id: room.id,
       name: room.name,
     },
     messages,
-  };
-
-  if (!roomInfo) {
-    return res.status(400).json({ message: 'Cannot transfer rooms info' });
-  }
-
-  return res.status(200).json(roomInfo);
+  });
 };
 
 const createRoom = async (req, res) => {
@@ -140,7 +138,7 @@ const joinRoom = async (req, res) => {
     return res.status(404).json({ message: 'Room not found' });
   }
 
-  await roomService.addUserToRoom(roomId, userId);
+  await roomService.addUserToRoom(userId, roomId);
 
   return res.status(200).json({ message: 'Joined room successfully' });
 };
