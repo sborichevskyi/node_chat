@@ -17,7 +17,7 @@ export function createServer() {
   );
 
   server.get('/', (req, res) => {
-    res.sendStatus(200).json({ message: 'Server is running' });
+    res.status(200).json({ message: 'Server is running' });
   });
 
   server.use('/user', userRouter);

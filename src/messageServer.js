@@ -10,13 +10,18 @@ export const messageServer = (io) => {
     });
 
     socket.on('newMessage', async ({ roomId, userId, text }) => {
-      const message = await messageService.createMessage({
-        roomId,
-        userId,
-        text,
-      });
+      try {
+        const message = await messageService.createMessage({
+          roomId,
+          userId,
+          text,
+        });
 
-      io.to(`room_${roomId}`).emit('messageBroadcast', message);
+        io.to(`room_${roomId}`).emit('messageBroadcast', message);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('Error in newMessage handler:', err);
+      }
     });
 
     socket.on('disconnect', () => {

@@ -94,33 +94,55 @@ const mergeRooms = async (req, res) => {
   const user = req.user;
   const { targetRoomId } = req.body;
 
-  const usersRooms = await roomService.findRoomsByUserId(user.id);
-  const targetRoom = usersRooms.find(
-    (r) => r.id === parseInt(targetRoomId, 10),
-  );
+  if (!user) {
+    return res.status(401).json({ error: 'User not authenticated' });
+  }
 
   if (!currentRoom) {
-    return res.status(404).json({ error: 'Room not found' });
+    return res.status(404).json({ error: 'Current room not found' });
   }
 
   if (!targetRoomId) {
     return res.status(400).json({ error: 'No targetRoomId provided' });
   }
 
+  const targetRoomIdNum = parseInt(targetRoomId, 10);
+
+  if (Number.isNaN(targetRoomIdNum)) {
+    return res.status(400).json({ error: 'Invalid targetRoomId' });
+  }
+
+  const usersRooms = await roomService.findRoomsByUserId(user.id);
+  const targetRoom = usersRooms.find((r) => r.id === targetRoomIdNum);
+
   if (!targetRoom) {
-    return res.status(403).json({ error: 'The user doesnt have access' });
+    return res
+      .status(403)
+      .json({ error: 'The user doesn’t have access to the target room' });
   }
 
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
+  await userService.mergeUsers(currentRoom.id, targetRoomIdNum);
+  await messageService.mergeMessages(currentRoom.id, targetRoomIdNum);
 
-  await userService.mergeUsers(currentRoom.id, targetRoomId);
-  await messageService.mergeMessages(currentRoom.id, targetRoomId);
   await currentRoom.setUsers([]);
   await currentRoom.destroy();
 
   return res.status(200).json(targetRoom);
+};
+
+const joinRoom = async (req, res) => {
+  const { roomId } = req.params;
+  const userId = req.user.id;
+
+  const room = await roomService.findRoomById(roomId);
+
+  if (!room) {
+    return res.status(404).json({ message: 'Room not found' });
+  }
+
+  await roomService.addUserToRoom(roomId, userId);
+
+  return res.status(200).json({ message: 'Joined room successfully' });
 };
 
 export const roomController = {
@@ -129,4 +151,5 @@ export const roomController = {
   deleteRoom,
   renameRoom,
   mergeRooms,
+  joinRoom,
 };

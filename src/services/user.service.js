@@ -55,10 +55,17 @@ const mergeUsers = async (roomId, targetRoomId) => {
   return { merged: usersToMerge.length, into: targetRoomId };
 };
 
+const getUserNameById = async (userId) => {
+  const user = User.findOne({ where: { userId } });
+
+  return user.name;
+};
+
 export const userService = {
   createUser,
   getUserById,
   getUserByName,
   findUsersByRoomId,
   mergeUsers,
+  getUserNameById,
 };

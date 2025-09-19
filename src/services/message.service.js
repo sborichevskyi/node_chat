@@ -1,13 +1,22 @@
 import { Message } from '../data/message.js';
+import { User } from '../data/user.js';
 
 const findRoomsMessages = async (roomId) => {
-  const messages = await Message.findAll({ where: { roomId } });
+  const rawMessages = await Message.findAll({
+    where: { roomId },
+    include: [{ model: User, attributes: ['name'] }],
+    order: [['createdAt', 'ASC']],
+  });
 
-  if (!messages) {
+  if (!rawMessages || rawMessages.length === 0) {
     return [];
   }
 
-  return messages;
+  return rawMessages.map((message) => ({
+    author: message.User.name,
+    text: message.text,
+    time: message.createdAt,
+  }));
 };
 
 const mergeMessages = async (roomId, targetRoomId) => {
@@ -25,20 +34,26 @@ const mergeMessages = async (roomId, targetRoomId) => {
   return { moved: messages.length, into: targetRoomId };
 };
 
-const sendMessage = async (roomId, userId, text) => {
-  const message = {
+const createMessage = async (roomId, userId, text) => {
+  const message = await Message.create({
     text: text.trim(),
-    userId: userId,
-    roomId: roomId,
+    userId,
+    roomId,
+  });
+
+  const savedMessage = await Message.findByPk(message.id, {
+    include: [{ model: User, attributes: ['name'] }],
+  });
+
+  return {
+    author: savedMessage.User.name,
+    text: savedMessage.text,
+    time: savedMessage.createdAt,
   };
-
-  await Message.create(message);
-
-  return message;
 };
 
 export const messageService = {
   findRoomsMessages,
   mergeMessages,
-  sendMessage,
+  createMessage,
 };

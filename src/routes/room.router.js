@@ -12,7 +12,8 @@ roomRouter.get(
   isUserInRoom,
   catchError(roomController.getRoomInfoByRoomId),
 );
-roomRouter.post('/:roomId', isAuth, catchError(roomController.createRoom));
+
+roomRouter.post('/', isAuth, catchError(roomController.createRoom));
 
 roomRouter.delete(
   '/:roomId',
@@ -34,3 +35,5 @@ roomRouter.post(
   isUserInRoom,
   catchError(roomController.mergeRooms),
 );
+
+roomRouter.post('/:roomId/join', isAuth, roomController.joinRoom);
